@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: nextcloud
+      service: nextcloud
+  template:
+    metadata:
+      labels:
+        type: nextcloud
+        service: nextcloud
+    spec:
+      containers:
+        - name: nextcloud
+          image: nextcloud:22.2.9-apache
+          # imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1000Mi
+            requests:
+              cpu: 500m
+              memory: 1000Mi
+          env:
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
+              value: "vaibhavk8s.centralindia.cloudapp.azure.com k8s.vaibhavchopra.ml"
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud
+spec:
+  ports:
+    - port: 80
+  selector:
+    type: nextcloud
+    service: nextcloud

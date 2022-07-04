@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cpns-ingress
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    cert-manager.io/issuer: letsencrypt-prod
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+    - host: vaibhavk8s.centralindia.cloudapp.azure.com
+      http: &http_rules
+        paths:
+          - path: /subscriber*
+            pathType: Prefix
+            backend:
+              service:
+                name: cpns-subscriber
+                port:
+                  number: 80
+          - path: /channel-manager*
+            pathType: Prefix
+            backend:
+              service:
+                name: cpns-channel-manager
+                port:
+                  number: 80
+          - path: /api/*
+            pathType: Prefix
+            backend:
+              service:
+                name: cpns-backend
+                port:
+                  number: 8000
+          - path: /*
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  number: 80
+    - host: k8s.vaibhavchopra.ml
+      http: *http_rules
+  tls:
+    - hosts:
+        - vaibhavk8s.centralindia.cloudapp.azure.com
+        - k8s.vaibhavchopra.ml
+      secretName: "cpns-ingress-tls"

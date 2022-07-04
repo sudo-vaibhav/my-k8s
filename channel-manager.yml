@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpns-channel-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: frontend
+      service: cpns-channel-manager
+  template:
+    metadata:
+      labels:
+        type: frontend
+        service: cpns-channel-manager
+    spec:
+      containers:
+        - name: frontend
+          image: vaibhavchopra/cpns-channel-manager:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 100m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          readinessProbe:
+            httpGet:
+              path: /channel-manager
+              port: 80
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /channel-manager
+              port: 80
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpns-channel-manager
+spec:
+  ports:
+    - port: 80
+  selector:
+    type: frontend
+    service: cpns-channel-manager

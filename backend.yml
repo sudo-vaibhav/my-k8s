@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpns-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      type: backend
+      service: cpns-backend
+  template:
+    metadata:
+      labels:
+        type: backend
+        service: cpns-backend
+    spec:
+      containers:
+        - name: backend
+          image: vaibhavchopra/cpns-backend:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 100m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          env:
+            - name: DB_URL
+              value: mongodb://cpns-db:27017/cpns
+          readinessProbe:
+            httpGet:
+              path: /api/public-key/
+              port: 8000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/public-key/
+              port: 8000
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpns-backend
+spec:
+  ports:
+    - port: 8000
+  selector:
+    type: backend
+    service: cpns-backend

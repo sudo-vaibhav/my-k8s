@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpns-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: db
+      service: cpns-db
+  template:
+    metadata:
+      labels:
+        type: db
+        service: cpns-db
+    spec:
+      containers:
+        - name: db
+          image: mongo:4.2.21-bionic
+          resources:
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 400Mi
+          ports:
+            - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cpns-db
+spec:
+  ports:
+    - port: 27017
+  selector:
+    type: db
+    service: cpns-db
